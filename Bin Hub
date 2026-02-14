@@ -1,111 +1,79 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Bin Hub | Blue Lock",
+    Name = "Bin Hub | Fix No-Clip",
     LoadingTitle = "Rayfield UI System",
     LoadingSubtitle = "by trinhvanhai21",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "BinHubConfigs",
-        FileName = "BlueLockConfig"
-    }
+    ConfigurationSaving = {Enabled = true, FolderName = "BinHubConfigs", FileName = "SoloConfig"}
 })
 
 -- Biến cấu hình
-_G.HitboxSize = 10
+_G.MyHitboxSize = 5
 _G.BallHitboxSize = 12
 _G.HitboxEnabled = false
 _G.InfStamina = false
-_G.FullBright = false
+_G.AutoGK = false
+_G.GKDistance = 20
 _G.MusicVolume = 2
 
 -- Tab
-local MainTab = Window:CreateTab("Main Hacks ⚽", 4483362458)
+local MainTab = Window:CreateTab("Main ⚽", 4483362458)
+local GKTab = Window:CreateTab("Auto GK 🧤", 4483362458)
 local MusicTab = Window:CreateTab("Music 🎶", 4483362458)
 
---- HÀM NHẠC ---
-local CurrentSound = nil
-local function PlayMusic(id)
-    if CurrentSound then CurrentSound:Stop() CurrentSound:Destroy() end
-    CurrentSound = Instance.new("Sound", game.Workspace)
-    CurrentSound.SoundId = "rbxassetid://" .. id
-    CurrentSound.Volume = _G.MusicVolume
-    CurrentSound.Looped = true
-    CurrentSound:Play()
-end
-
---- TAB NHẠC (ĐÃ THÊM NHẠC TẾT) ---
-MusicTab:CreateSection("Danh Sách Nhạc")
-
-MusicTab:CreateButton({
-    Name = "🧧 Phát Nhạc Tết",
-    Callback = function()
-        PlayMusic("76644468670985")
-        Rayfield:Notify({Title = "Music", Content = "Đang phát: Nhạc Tết 🧧", Duration = 2})
-    end,
-})
-
-MusicTab:CreateSlider({
-    Name = "Âm Lượng Nhạc",
-    Range = {0, 10},
-    Increment = 0.5,
-    Suffix = " Vol",
-    CurrentValue = 2,
-    Flag = "VolSlider",
-    Callback = function(Value)
-        _G.MusicVolume = Value
-        if CurrentSound then CurrentSound.Volume = Value end
-    end,
-})
-
-MusicTab:CreateButton({
-    Name = "Dừng Nhạc ⏸️",
-    Callback = function()
-        if CurrentSound then CurrentSound:Stop() end
-    end,
-})
-
---- LOGIC HACK (MƯỢT MÀ) ---
-local function ApplyHitboxLogic()
+--- LOGIC HITBOX FIX LÚN (HIPHEIGHT OFFSET) ---
+local function ApplySoloHitbox()
     task.spawn(function()
         while _G.HitboxEnabled do
-            -- Người (Hình Hộp)
-            for _, player in pairs(game:GetService("Players"):GetPlayers()) do
-                if player ~= game:GetService("Players").LocalPlayer and player.Character then
-                    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        hrp.Size = Vector3.new(_G.HitboxSize, _G.HitboxSize, _G.HitboxSize)
-                        hrp.Transparency = 0.7
-                        hrp.BrickColor = BrickColor.new("Steel blue")
-                        hrp.Material = Enum.Material.ForceField
-                        hrp.CanCollide = false
-                    end
+            local lp = game:GetService("Players").LocalPlayer
+            if lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") and lp.Character:FindFirstChild("Humanoid") then
+                local hrp = lp.Character.HumanoidRootPart
+                local hum = lp.Character.Humanoid
+                
+                -- SỬA LỖI LÚN: Nâng HipHeight dựa trên Size Hitbox
+                if _G.MyHitboxSize > 2 then
+                    hum.HipHeight = _G.MyHitboxSize / 2
+                else
+                    hum.HipHeight = 2 -- Mặc định
                 end
+                
+                hrp.Size = Vector3.new(_G.MyHitboxSize, _G.MyHitboxSize, _G.MyHitboxSize)
+                hrp.Transparency = 0.8
+                hrp.BrickColor = BrickColor.new("Steel blue")
+                hrp.CanCollide = false -- Tắt va chạm để không bị bắn vọt lên trời
             end
-            -- Bóng (Hình Tròn)
+            
+            -- Hitbox Bóng Màu Đỏ
             for _, obj in pairs(game.Workspace:GetDescendants()) do
-                if obj:IsA("BasePart") and (obj.Name == "Ball" or obj.Name == "Football" or obj:FindFirstChild("BallScript")) then
-                    obj.Shape = Enum.PartType.Ball
+                if obj:IsA("BasePart") and (obj.Name == "Ball" or obj.Name == "Football") then
                     obj.Size = Vector3.new(_G.BallHitboxSize, _G.BallHitboxSize, _G.BallHitboxSize)
-                    obj.Transparency = 0.5
-                    obj.BrickColor = BrickColor.new("Cyan")
-                    obj.Material = Enum.Material.ForceField
-                    obj.CanCollide = false
+                    obj.BrickColor = BrickColor.new("Bright red")
+                    obj.Transparency = 0.6
                 end
             end
-            task.wait(0.3)
+            task.wait(0.5)
         end
     end)
 end
 
+--- AUTO GK LOGIC (TỰ ĐỘNG BẮT TRONG VÙNG) ---
 task.spawn(function()
-    while task.wait(0.5) do
-        if _G.InfStamina then
+    while task.wait() do
+        if _G.AutoGK then
             local lp = game:GetService("Players").LocalPlayer
-            if lp.Character then
-                for _, v in pairs(lp.Character:GetDescendants()) do
-                    if (v:IsA("NumberValue") or v:IsA("IntValue")) and string.find(v.Name:lower(), "stamina") then
-                        v.Value = 100
+            local ball = nil
+            for _, obj in pairs(game.Workspace:GetDescendants()) do
+                if obj.Name == "Ball" or obj.Name == "Football" then ball = obj break end
+            end
+            
+            if ball and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
+                local hrp = lp.Character.HumanoidRootPart
+                local dist = (hrp.Position - ball.Position).Magnitude
+                if dist < _G.GKDistance then
+                    -- Quay mặt về bóng và di chuyển nhẹ tới bóng
+                    hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(ball.Position.X, hrp.Position.Y, ball.Position.Z))
+                    if dist > 2 then
+                        hrp.Velocity = (ball.Position - hrp.Position).Unit * 50
                     end
                 end
             end
@@ -113,38 +81,84 @@ task.spawn(function()
     end
 end)
 
---- GIAO DIỆN ĐIỀU KHIỂN ---
+--- GIAO DIỆN MAIN ---
 MainTab:CreateToggle({
-    Name = "Kích hoạt Hitbox Mix",
+    Name = "Bật Hitbox Solo",
     CurrentValue = false,
-    Flag = "HitboxToggle",
     Callback = function(Value)
         _G.HitboxEnabled = Value
-        if Value then ApplyHitboxLogic() end
+        if Value then 
+            ApplySoloHitbox() 
+        else
+            -- Reset về bình thường khi tắt
+            local lp = game:GetService("Players").LocalPlayer
+            if lp.Character and lp.Character:FindFirstChild("Humanoid") then
+                lp.Character.Humanoid.HipHeight = 2
+                lp.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
+            end
+        end
     end,
 })
 
-MainTab:CreateToggle({
-    Name = "Vô hạn Thể lực",
-    CurrentValue = false,
-    Flag = "StamToggle",
-    Callback = function(Value) _G.InfStamina = Value end,
-})
-
 MainTab:CreateSlider({
-    Name = "Kích thước Người (Box)",
-    Range = {2, 30},
+    Name = "Size Hitbox Bạn (Max 25)",
+    Range = {2, 25},
     Increment = 1,
-    CurrentValue = 10,
-    Callback = function(Value) _G.HitboxSize = Value end,
+    CurrentValue = 5,
+    Callback = function(Value) _G.MyHitboxSize = Value end,
 })
 
 MainTab:CreateSlider({
-    Name = "Kích thước Bóng (Sphere)",
+    Name = "Size Hitbox Bóng",
     Range = {2, 30},
     Increment = 1,
     CurrentValue = 12,
     Callback = function(Value) _G.BallHitboxSize = Value end,
+})
+
+--- GIAO DIỆN AUTO GK ---
+GKTab:CreateToggle({
+    Name = "Bật Chế Độ Bắt Bóng Tự Động",
+    CurrentValue = false,
+    Callback = function(Value) _G.AutoGK = Value end,
+})
+
+GKTab:CreateSlider({
+    Name = "Vùng nguy hiểm",
+    Range = {5, 50},
+    Increment = 1,
+    CurrentValue = 20,
+    Callback = function(Value) _G.GKDistance = Value end,
+})
+
+--- GIAO DIỆN MUSIC ---
+local CurrentSound = nil
+MusicTab:CreateButton({
+    Name = "🧧 Phát Nhạc Tết",
+    Callback = function()
+        if CurrentSound then CurrentSound:Stop() CurrentSound:Destroy() end
+        CurrentSound = Instance.new("Sound", game.Workspace)
+        CurrentSound.SoundId = "rbxassetid://76644468670985"
+        CurrentSound.Volume = _G.MusicVolume
+        CurrentSound.Looped = true
+        CurrentSound:Play()
+    end,
+})
+
+MusicTab:CreateButton({
+    Name = "🛑 DỪNG NHẠC",
+    Callback = function() if CurrentSound then CurrentSound:Stop() end end,
+})
+
+MusicTab:CreateSlider({
+    Name = "Âm Lượng",
+    Range = {0, 10},
+    Increment = 0.5,
+    CurrentValue = 2,
+    Callback = function(Value)
+        _G.MusicVolume = Value
+        if CurrentSound then CurrentSound.Volume = Value end
+    end,
 })
 
 Rayfield:LoadConfiguration()
