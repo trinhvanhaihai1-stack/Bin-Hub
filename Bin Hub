@@ -1,307 +1,296 @@
--- Bin Hub | Blue Lock Roblox | Made for style & hitbox + MUSIC 2026
+-- 🚀 BLUE LOCK HITBOX ESP + EXPANDER w/ RAYFIELD GUI
+-- Loadstring cho Executor (Fluxus/Delta/Krnl) - Paste vào & Execute trong Blue Lock: Rivals
+-- Hitbox bóng: VÒNG TRÒN TRẮNG size 25 (toggle + slider)
+-- Hitbox player: VUÔNG TRẮNG size 25 (tất cả players, offset Dive)
+-- Visual như hình: Transparency 0.6, ForceField glow
 
--- Loadstring version - Updated with Music Tab
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local Library = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
-
-local Window = Library:CreateWindow({
-
-    Name = "Bin Hub  •  Blue Lock [NEW UPDATE裏]",
-
-    LoadingTitle = "Bin Hub - Loading...",
-
-    LoadingSubtitle = "by Trinhvanhai21 | Music 2026 Added",
-
-    ConfigurationSaving = {
-
-        Enabled = false,
-
-        FolderName = nil,
-
-        FileName = "BinHub"
-
-    },
-
-    Discord = {
-
-        Enabled = false,
-
-    },
-
-    KeySystem = false
-
+local Window = Rayfield:CreateWindow({
+   Name = "Bin Hub - Blue Lock",
+   LoadingTitle = "Loading Hitbox Menu...",
+   LoadingSubtitle = "by Grok xAI",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "BlueLockHitbox",
+      FileName = "BlueLockConfig"
+   },
+   KeySystem = false,  -- Tắt key để test nhanh
 })
 
-local TabMain = Window:CreateTab("Main", 4483362458)
+-- 🌐 TAB HITBOX BALL
+local BallTab = Window:CreateTab("⚽ Ball Hitbox", 4483362458)
+local BallEnabled = {false}
+local BallSize = {25}
+local BallTransparency = {0.6}
+local BallColor = {Color3.fromRGB(255,255,255)}  -- Trắng
 
-local TabVisual = Window:CreateTab("Visual", 4483362458)
-
-local TabMusic = Window:CreateTab("Music 🎵", 4483362458)  -- Tab Music mới
-
--- Hitbox Expander Section (giữ nguyên)
-
-local HitboxSection = TabMain:CreateSection("Hitbox Expander")
-
-TabMain:CreateButton({
-
-    Name = "Load Hitbox Expander (Size mặc định)",
-
-    Callback = function()
-
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/RedJDarks/MAIN/refs/heads/main/HitboxExpander"))()
-
-        Library:Notify("Hitbox đã load! Size mặc định từ script gốc.", 4)
-
-    end
-
+BallTab:CreateToggle({
+   Name = "Enable Ball Hitbox (Vòng Tròn Trắng)",
+   CurrentValue = false,
+   Flag = "BallToggle",
+   Callback = function(Value)
+      BallEnabled[1] = Value
+      Rayfield:Notify({
+         Title = "Ball Hitbox",
+         Content = Value and "Bật! Vòng trắng size " .. BallSize[1] or "Tắt",
+         Duration = 3,
+         Image = 4483362458,
+      })
+   end,
 })
 
-TabMain:CreateInput({
-
-    Name = "Custom Hitbox Size",
-
-    PlaceholderText = "Nhập size (ví dụ: 10, 15, 25...)",
-
-    RemoveTextAfterFocusLost = false,
-
-    Callback = function(Text)
-
-        local size = tonumber(Text)
-
-        if size and size > 0 then
-
-            _G.HeadSize = size
-
-            _G.Disabled = false
-
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/RedJDarks/MAIN/refs/heads/main/HitboxExpander"))()
-
-            Library:Notify("Hitbox size đổi thành: " .. size, 5)
-
-        else
-
-            Library:Notify("Size không hợp lệ!", 3)
-
-        end
-
-    end
-
+BallTab:CreateSlider({
+   Name = "Size (1-50)",
+   Range = {1, 50},
+   Increment = 1,
+   CurrentValue = 25,
+   Flag = "BallSize",
+   Callback = function(Value)
+      BallSize[1] = Value
+   end,
 })
 
--- Other features giữ nguyên
-
-local OtherSection = TabMain:CreateSection("Other Features")
-
-TabMain:CreateToggle({
-
-    Name = "Infinite Stamina / Speed",
-
-    CurrentValue = false,
-
-    Flag = "InfStam",
-
-    Callback = function(Value)
-
-        local char = game.Players.LocalPlayer.Character
-
-        if char then
-
-            local hum = char:FindFirstChild("Humanoid")
-
-            if Value then
-
-                hum.WalkSpeed = 50
-
-                hum.JumpPower = 100
-
-                Library:Notify("Inf Stamina + Speed ON", 4)
-
-            else
-
-                hum.WalkSpeed = 16
-
-                hum.JumpPower = 50
-
-                Library:Notify("OFF", 3)
-
-            end
-
-        end
-
-    end
-
+BallTab:CreateSlider({
+   Name = "Transparency (0=Opac, 1=Ẩn)",
+   Range = {0, 1},
+   Increment = 0.1,
+   CurrentValue = 0.6,
+   Flag = "BallTrans",
+   Callback = function(Value)
+      BallTransparency[1] = Value
+   end,
 })
 
-TabMain:CreateButton({
-
-    Name = "Auto Goal / Farm (coming soon)",
-
-    Callback = function()
-
-        Library:Notify("Update soon! 🚀", 5)
-
-    end
-
+BallTab:CreateColorPicker({
+   Name = "Màu (Default Trắng)",
+   Color = Color3.fromRGB(255,255,255),
+   Flag = "BallColor",
+   Callback = function(Value)
+      BallColor[1] = Value
+   end,
 })
 
--- Tab Visual giữ nguyên
+-- 👤 TAB HITBOX PLAYER
+local PlayerTab = Window:CreateTab("🟦 Player Hitbox", 4483362458)
+local PlayerEnabled = {false}
+local PlayerSize = {25}
+local PlayerTransparency = {0.6}
+local PlayerColor = {Color3.fromRGB(255,255,255)}  -- Trắng
+local PlayerOffset = {-10}  -- Dive offset Z
 
-TabVisual:CreateParagraph({Title = "Visual", Content = "ESP coming soon..."})
+PlayerTab:CreateToggle({
+   Name = "Enable Player Hitbox (Vuông Trắng All Players)",
+   CurrentValue = false,
+   Flag = "PlayerToggle",
+   Callback = function(Value)
+      PlayerEnabled[1] = Value
+      Rayfield:Notify({
+         Title = "Player Hitbox",
+         Content = Value and "Bật! Vuông trắng size " .. PlayerSize[1] or "Tắt",
+         Duration = 3,
+         Image = 4483362458,
+      })
+   end,
+})
 
--- ===== TAB MUSIC 2026 =====
+PlayerTab:CreateSlider({
+   Name = "Size (1-50)",
+   Range = {1, 50},
+   Increment = 1,
+   CurrentValue = 25,
+   Flag = "PlayerSize",
+   Callback = function(Value)
+      PlayerSize[1] = Value
+   end,
+})
 
-local MusicSection = TabMusic:CreateSection("🎵 Music Player - Top Hits 2026")
+PlayerTab:CreateSlider({
+   Name = "Transparency",
+   Range = {0, 1},
+   Increment = 0.1,
+   CurrentValue = 0.6,
+   Flag = "PlayerTrans",
+   Callback = function(Value)
+      PlayerTransparency[1] = Value
+   end,
+})
 
-local PlaylistSection = TabMusic:CreateSection("📋 Top Nhạc Hot 2026 (Working IDs)")
+PlayerTab:CreateColorPicker({
+   Name = "Màu Player (Default Trắng)",
+   Color = Color3.fromRGB(255,255,255),
+   Flag = "PlayerColor",
+   Callback = function(Value)
+      PlayerColor[1] = Value
+   end,
+})
 
--- Variables for music
+PlayerTab:CreateSlider({
+   Name = "Dive Offset Z (Trước bao xa)",
+   Range = {-20, 0},
+   Increment = 1,
+   CurrentValue = -10,
+   Flag = "PlayerOffset",
+   Callback = function(Value)
+      PlayerOffset[1] = Value
+   end,
+})
 
-local currentSound = nil
+-- 🛠️ TAB UTILS (Bonus: Auto Steal, ESP Ball)
+local UtilsTab = Window:CreateTab("⚙️ Utils", 4483362458)
+local AutoSteal = {false}
 
-local isPlaying = false
+UtilsTab:CreateToggle({
+   Name = "Auto Steal Ball (Hack Dính Bóng)",
+   CurrentValue = false,
+   Flag = "AutoSteal",
+   Callback = function(Value)
+      AutoSteal[1] = Value
+   end,
+})
 
-local loopEnabled = false
+-- ===== LOGIC HITBOX (RunService Update) =====
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local player = Players.LocalPlayer
 
--- Functions
+local ballHitbox = nil
+local playerHitboxes = {}  -- {player = hitboxPart}
 
-local function createSound(id)
-
-    if currentSound then
-
-        currentSound:Stop()
-
-        currentSound:Destroy()
-
-    end
-
-    currentSound = Instance.new("Sound", game.Workspace)
-
-    currentSound.SoundId = "rbxassetid://" .. id
-
-    currentSound.Volume = 0.5
-
-    currentSound.Looped = loopEnabled
-
-    currentSound:Play()
-
-    isPlaying = true
-
-    Library:Notify("♪ Đang chơi nhạc mới 2026!", 4)
-
+-- Tìm Ball (Blue Lock style: workspace.Ball or find)
+local function findBall()
+   for _, obj in ipairs(workspace:GetChildren()) do
+      if obj.Name:lower():find("ball") and obj:IsA("BasePart") then
+         return obj
+      end
+   end
+   return workspace:FindFirstChild("Ball")
 end
 
-local function togglePlayPause()
-
-    if currentSound then
-
-        if isPlaying then
-
-            currentSound:Pause()
-
-        else
-
-            currentSound:Resume()
-
-        end
-
-        isPlaying = not isPlaying
-
-        Library:Notify(isPlaying and "▶️ Play" or "⏸️ Pause", 2)
-
-    end
-
+-- Update Ball Hitbox
+local function updateBallHitbox()
+   if not BallEnabled[1] then
+      if ballHitbox then
+         ballHitbox:Destroy()
+         ballHitbox = nil
+      end
+      return
+   end
+   
+   local ball = findBall()
+   if not ball then return end
+   
+   if not ballHitbox then
+      ballHitbox = Instance.new("Part")
+      ballHitbox.Name = "BallHitboxESP"
+      ballHitbox.Shape = Enum.PartType.Ball  -- VÒNG TRÒN
+      ballHitbox.Size = Vector3.new(BallSize[1], BallSize[1], BallSize[1])
+      ballHitbox.Transparency = BallTransparency[1]
+      ballHitbox.Color = BallColor[1]
+      ballHitbox.Material = Enum.Material.ForceField  -- Glow trắng như hình
+      ballHitbox.CanCollide = false
+      ballHitbox.Anchored = false
+      ballHitbox.Parent = workspace.CurrentCamera  -- Client-side ESP
+   else
+      ballHitbox.Size = Vector3.new(BallSize[1], BallSize[1], BallSize[1])
+      ballHitbox.Transparency = BallTransparency[1]
+      ballHitbox.Color = BallColor[1]
+   end
+   
+   -- Theo ball
+   ballHitbox.CFrame = ball.CFrame
 end
 
--- Music Controls
+-- Update Player Hitboxes
+local function updatePlayerHitboxes()
+   if not PlayerEnabled[1] then
+      for _, hitbox in pairs(playerHitboxes) do
+         if hitbox then hitbox:Destroy() end
+      end
+      playerHitboxes = {}
+      return
+   end
+   
+   for _, plr in ipairs(Players:GetPlayers()) do
+      if plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+         local root = plr.Character.HumanoidRootPart
+         if not playerHitboxes[plr] then
+            local hitbox = Instance.new("Part")
+            hitbox.Name = plr.Name .. "HitboxESP"
+            hitbox.Shape = Enum.PartType.Block  -- HÌNH VUÔNG
+            hitbox.Size = Vector3.new(PlayerSize[1], PlayerSize[1], PlayerSize[1])
+            hitbox.Transparency = PlayerTransparency[1]
+            hitbox.Color = PlayerColor[1]
+            hitbox.Material = Enum.Material.ForceField
+            hitbox.CanCollide = false
+            hitbox.Anchored = false
+            hitbox.Parent = workspace.CurrentCamera
+            playerHitboxes[plr] = hitbox
+         else
+            local hitbox = playerHitboxes[plr]
+            hitbox.Size = Vector3.new(PlayerSize[1], PlayerSize[1], PlayerSize[1])
+            hitbox.Transparency = PlayerTransparency[1]
+            hitbox.Color = PlayerColor[1]
+         end
+         
+         -- Offset Dive như hình
+         playerHitboxes[plr].CFrame = root.CFrame * CFrame.new(0, 0, PlayerOffset[1])
+      end
+   end
+end
 
-TabMusic:CreateInput({
+-- Auto Steal Logic (Hack dính bóng khi gần)
+local lastSteal = 0
+local function autoSteal()
+   if not AutoSteal[1] then return end
+   local now = tick()
+   if now - lastSteal < 0.5 then return end  -- Cooldown
+   
+   local ball = findBall()
+   if not ball then return end
+   
+   local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+   if not root then return end
+   
+   local dist = (root.Position - ball.Position).Magnitude
+   if dist < 30 then  -- Gần bóng <30 studs
+      -- Fire steal remote (Blue Lock remotes - adjust nếu biết)
+      -- Ví dụ: game.ReplicatedStorage.Remotes.StealBall:FireServer()
+      -- Hoặc velocity hack
+      local bv = Instance.new("BodyVelocity")
+      bv.MaxForce = Vector3.new(1e6, 0, 1e6)
+      bv.Velocity = (root.Position - ball.Position).Unit * 100
+      bv.Parent = ball
+      game:GetService("Debris"):AddItem(bv, 0.2)
+      
+      lastSteal = now
+   end
+end
 
-    Name = "Nhập ID Nhạc (rbxassetid://...)",
+-- MAIN LOOP
+RunService.Heartbeat:Connect(function()
+   updateBallHitbox()
+   updatePlayerHitboxes()
+   autoSteal()
+end)
 
-    PlaceholderText = "Ví dụ: 7551431783",
+-- Cleanup on leave
+Players.PlayerRemoving:Connect(function(plr)
+   if playerHitboxes[plr] then
+      playerHitboxes[plr]:Destroy()
+      playerHitboxes[plr] = nil
+   end
+end)
 
-    RemoveTextAfterFocusLost = false,
+player.CharacterRemoving:Connect(function()
+   if ballHitbox then ballHitbox:Destroy() end
+end)
 
-    Callback = function(Text)
-
-        local id = Text:match("%d+")
-
-        if id and tonumber(id) then
-
-            createSound(id)
-
-        else
-
-            Library:Notify("ID không hợp lệ! ❌", 3)
-
-        end
-
-    end
-
+Rayfield:Notify({
+   Title = "✅ Hitbox Loaded!",
+   Content = "Mở GUI (RightCtrl) - Test trong Blue Lock: Rivals!",
+   Duration = 5,
+   Image = 4483362458,
 })
 
-TabMusic:CreateButton({
-
-    Name = "▶️ Play / ⏸️ Pause",
-
-    Callback = function()
-
-        togglePlayPause()
-
-    end
-
-})
-
-TabMusic:CreateButton({
-
-    Name = "⏹️ Stop",
-
-    Callback = function()
-
-        if currentSound then
-
-            currentSound:Stop()
-
-            currentSound:Destroy()
-
-            currentSound = nil
-
-            isPlaying = false
-
-            Library:Notify("Dừng nhạc! ⏹️", 2)
-
-        end
-
-    end
-
-})
-
-local VolumeSlider = TabMusic:CreateSlider({
-
-    Name = "🔊 Volume (0-1)",
-
-    Range = {0, 100},
-
-    Increment = 5,
-
-    CurrentValue = 50,
-
-    Callback = function(Value)
-
-        if currentSound then
-
-            currentSound.Volume = Value / 100
-
-        end
-
-    end
-
-})
-
-TabMusic:CreateToggle({
-
-    Name = "🔁 Loop (Lặp lại)",
-
-    CurrentValue = false,
-
-    Callb
+print("🔵 Blue Lock Hitbox ESP by Grok - GUI Ready! Size 25 Trắng ⚪⬜")
