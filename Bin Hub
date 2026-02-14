@@ -1,0 +1,307 @@
+-- Bin Hub | Blue Lock Roblox | Made for style & hitbox + MUSIC 2026
+
+-- Loadstring version - Updated with Music Tab
+
+local Library = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Window = Library:CreateWindow({
+
+    Name = "Bin Hub  •  Blue Lock [NEW UPDATE裏]",
+
+    LoadingTitle = "Bin Hub - Loading...",
+
+    LoadingSubtitle = "by Trinhvanhai21 | Music 2026 Added",
+
+    ConfigurationSaving = {
+
+        Enabled = false,
+
+        FolderName = nil,
+
+        FileName = "BinHub"
+
+    },
+
+    Discord = {
+
+        Enabled = false,
+
+    },
+
+    KeySystem = false
+
+})
+
+local TabMain = Window:CreateTab("Main", 4483362458)
+
+local TabVisual = Window:CreateTab("Visual", 4483362458)
+
+local TabMusic = Window:CreateTab("Music 🎵", 4483362458)  -- Tab Music mới
+
+-- Hitbox Expander Section (giữ nguyên)
+
+local HitboxSection = TabMain:CreateSection("Hitbox Expander")
+
+TabMain:CreateButton({
+
+    Name = "Load Hitbox Expander (Size mặc định)",
+
+    Callback = function()
+
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/RedJDarks/MAIN/refs/heads/main/HitboxExpander"))()
+
+        Library:Notify("Hitbox đã load! Size mặc định từ script gốc.", 4)
+
+    end
+
+})
+
+TabMain:CreateInput({
+
+    Name = "Custom Hitbox Size",
+
+    PlaceholderText = "Nhập size (ví dụ: 10, 15, 25...)",
+
+    RemoveTextAfterFocusLost = false,
+
+    Callback = function(Text)
+
+        local size = tonumber(Text)
+
+        if size and size > 0 then
+
+            _G.HeadSize = size
+
+            _G.Disabled = false
+
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/RedJDarks/MAIN/refs/heads/main/HitboxExpander"))()
+
+            Library:Notify("Hitbox size đổi thành: " .. size, 5)
+
+        else
+
+            Library:Notify("Size không hợp lệ!", 3)
+
+        end
+
+    end
+
+})
+
+-- Other features giữ nguyên
+
+local OtherSection = TabMain:CreateSection("Other Features")
+
+TabMain:CreateToggle({
+
+    Name = "Infinite Stamina / Speed",
+
+    CurrentValue = false,
+
+    Flag = "InfStam",
+
+    Callback = function(Value)
+
+        local char = game.Players.LocalPlayer.Character
+
+        if char then
+
+            local hum = char:FindFirstChild("Humanoid")
+
+            if Value then
+
+                hum.WalkSpeed = 50
+
+                hum.JumpPower = 100
+
+                Library:Notify("Inf Stamina + Speed ON", 4)
+
+            else
+
+                hum.WalkSpeed = 16
+
+                hum.JumpPower = 50
+
+                Library:Notify("OFF", 3)
+
+            end
+
+        end
+
+    end
+
+})
+
+TabMain:CreateButton({
+
+    Name = "Auto Goal / Farm (coming soon)",
+
+    Callback = function()
+
+        Library:Notify("Update soon! 🚀", 5)
+
+    end
+
+})
+
+-- Tab Visual giữ nguyên
+
+TabVisual:CreateParagraph({Title = "Visual", Content = "ESP coming soon..."})
+
+-- ===== TAB MUSIC 2026 =====
+
+local MusicSection = TabMusic:CreateSection("🎵 Music Player - Top Hits 2026")
+
+local PlaylistSection = TabMusic:CreateSection("📋 Top Nhạc Hot 2026 (Working IDs)")
+
+-- Variables for music
+
+local currentSound = nil
+
+local isPlaying = false
+
+local loopEnabled = false
+
+-- Functions
+
+local function createSound(id)
+
+    if currentSound then
+
+        currentSound:Stop()
+
+        currentSound:Destroy()
+
+    end
+
+    currentSound = Instance.new("Sound", game.Workspace)
+
+    currentSound.SoundId = "rbxassetid://" .. id
+
+    currentSound.Volume = 0.5
+
+    currentSound.Looped = loopEnabled
+
+    currentSound:Play()
+
+    isPlaying = true
+
+    Library:Notify("♪ Đang chơi nhạc mới 2026!", 4)
+
+end
+
+local function togglePlayPause()
+
+    if currentSound then
+
+        if isPlaying then
+
+            currentSound:Pause()
+
+        else
+
+            currentSound:Resume()
+
+        end
+
+        isPlaying = not isPlaying
+
+        Library:Notify(isPlaying and "▶️ Play" or "⏸️ Pause", 2)
+
+    end
+
+end
+
+-- Music Controls
+
+TabMusic:CreateInput({
+
+    Name = "Nhập ID Nhạc (rbxassetid://...)",
+
+    PlaceholderText = "Ví dụ: 7551431783",
+
+    RemoveTextAfterFocusLost = false,
+
+    Callback = function(Text)
+
+        local id = Text:match("%d+")
+
+        if id and tonumber(id) then
+
+            createSound(id)
+
+        else
+
+            Library:Notify("ID không hợp lệ! ❌", 3)
+
+        end
+
+    end
+
+})
+
+TabMusic:CreateButton({
+
+    Name = "▶️ Play / ⏸️ Pause",
+
+    Callback = function()
+
+        togglePlayPause()
+
+    end
+
+})
+
+TabMusic:CreateButton({
+
+    Name = "⏹️ Stop",
+
+    Callback = function()
+
+        if currentSound then
+
+            currentSound:Stop()
+
+            currentSound:Destroy()
+
+            currentSound = nil
+
+            isPlaying = false
+
+            Library:Notify("Dừng nhạc! ⏹️", 2)
+
+        end
+
+    end
+
+})
+
+local VolumeSlider = TabMusic:CreateSlider({
+
+    Name = "🔊 Volume (0-1)",
+
+    Range = {0, 100},
+
+    Increment = 5,
+
+    CurrentValue = 50,
+
+    Callback = function(Value)
+
+        if currentSound then
+
+            currentSound.Volume = Value / 100
+
+        end
+
+    end
+
+})
+
+TabMusic:CreateToggle({
+
+    Name = "🔁 Loop (Lặp lại)",
+
+    CurrentValue = false,
+
+    Callb
