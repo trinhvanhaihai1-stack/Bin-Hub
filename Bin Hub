@@ -1,27 +1,26 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-    Name = "Bin Hub | Fix No-Clip",
+    Name = "Bin Hub | Blue Lock Final Fix",
     LoadingTitle = "Rayfield UI System",
     LoadingSubtitle = "by trinhvanhai21",
-    ConfigurationSaving = {Enabled = true, FolderName = "BinHubConfigs", FileName = "SoloConfig"}
+    ConfigurationSaving = {Enabled = true, FolderName = "BinHubConfigs", FileName = "SoloConfigFix"}
 })
 
 -- Biến cấu hình
-_G.MyHitboxSize = 5
-_G.BallHitboxSize = 12
+_G.MyHitboxSize = 22
+_G.BallHitboxSize = 22
 _G.HitboxEnabled = false
 _G.InfStamina = false
-_G.AutoGK = false
-_G.GKDistance = 20
 _G.MusicVolume = 2
+_G.CustomHipHeight = 2 -- Độ cao mặc định
 
 -- Tab
 local MainTab = Window:CreateTab("Main ⚽", 4483362458)
-local GKTab = Window:CreateTab("Auto GK 🧤", 4483362458)
+local FixTab = Window:CreateTab("Sửa Lỗi 🔧", 4483362458)
 local MusicTab = Window:CreateTab("Music 🎶", 4483362458)
 
---- LOGIC HITBOX FIX LÚN (HIPHEIGHT OFFSET) ---
+--- LOGIC HITBOX ---
 local function ApplySoloHitbox()
     task.spawn(function()
         while _G.HitboxEnabled do
@@ -30,20 +29,18 @@ local function ApplySoloHitbox()
                 local hrp = lp.Character.HumanoidRootPart
                 local hum = lp.Character.Humanoid
                 
-                -- SỬA LỖI LÚN: Nâng HipHeight dựa trên Size Hitbox
-                if _G.MyHitboxSize > 2 then
-                    hum.HipHeight = _G.MyHitboxSize / 2
-                else
-                    hum.HipHeight = 2 -- Mặc định
-                end
+                -- Áp dụng độ cao từ thanh trượt
+                hum.HipHeight = _G.CustomHipHeight
                 
+                -- Chỉnh Hitbox
                 hrp.Size = Vector3.new(_G.MyHitboxSize, _G.MyHitboxSize, _G.MyHitboxSize)
                 hrp.Transparency = 0.8
                 hrp.BrickColor = BrickColor.new("Steel blue")
-                hrp.CanCollide = false -- Tắt va chạm để không bị bắn vọt lên trời
+                hrp.CanCollide = false 
+                hrp.Massless = true -- Giúp nhân vật nhẹ hơn, đỡ bị lỗi vật lý
             end
             
-            -- Hitbox Bóng Màu Đỏ
+            -- Hitbox Bóng (Đỏ)
             for _, obj in pairs(game.Workspace:GetDescendants()) do
                 if obj:IsA("BasePart") and (obj.Name == "Ball" or obj.Name == "Football") then
                     obj.Size = Vector3.new(_G.BallHitboxSize, _G.BallHitboxSize, _G.BallHitboxSize)
@@ -56,44 +53,19 @@ local function ApplySoloHitbox()
     end)
 end
 
---- AUTO GK LOGIC (TỰ ĐỘNG BẮT TRONG VÙNG) ---
-task.spawn(function()
-    while task.wait() do
-        if _G.AutoGK then
-            local lp = game:GetService("Players").LocalPlayer
-            local ball = nil
-            for _, obj in pairs(game.Workspace:GetDescendants()) do
-                if obj.Name == "Ball" or obj.Name == "Football" then ball = obj break end
-            end
-            
-            if ball and lp.Character and lp.Character:FindFirstChild("HumanoidRootPart") then
-                local hrp = lp.Character.HumanoidRootPart
-                local dist = (hrp.Position - ball.Position).Magnitude
-                if dist < _G.GKDistance then
-                    -- Quay mặt về bóng và di chuyển nhẹ tới bóng
-                    hrp.CFrame = CFrame.new(hrp.Position, Vector3.new(ball.Position.X, hrp.Position.Y, ball.Position.Z))
-                    if dist > 2 then
-                        hrp.Velocity = (ball.Position - hrp.Position).Unit * 50
-                    end
-                end
-            end
-        end
-    end
-end)
-
---- GIAO DIỆN MAIN ---
+--- GIAO DIỆN CHÍNH ---
 MainTab:CreateToggle({
-    Name = "Bật Hitbox Solo",
+    Name = "Kích hoạt Hitbox (Bạn & Bóng)",
     CurrentValue = false,
     Callback = function(Value)
         _G.HitboxEnabled = Value
         if Value then 
             ApplySoloHitbox() 
         else
-            -- Reset về bình thường khi tắt
+            -- Reset về mặc định khi tắt
             local lp = game:GetService("Players").LocalPlayer
             if lp.Character and lp.Character:FindFirstChild("Humanoid") then
-                lp.Character.Humanoid.HipHeight = 2
+                lp.Character.Humanoid.HipHeight = 2 -- Reset chiều cao
                 lp.Character.HumanoidRootPart.Size = Vector3.new(2, 2, 1)
             end
         end
@@ -101,10 +73,10 @@ MainTab:CreateToggle({
 })
 
 MainTab:CreateSlider({
-    Name = "Size Hitbox Bạn (Max 25)",
+    Name = "Size Hitbox Bạn",
     Range = {2, 25},
     Increment = 1,
-    CurrentValue = 5,
+    CurrentValue = 22,
     Callback = function(Value) _G.MyHitboxSize = Value end,
 })
 
@@ -112,26 +84,32 @@ MainTab:CreateSlider({
     Name = "Size Hitbox Bóng",
     Range = {2, 30},
     Increment = 1,
-    CurrentValue = 12,
+    CurrentValue = 22,
     Callback = function(Value) _G.BallHitboxSize = Value end,
 })
 
---- GIAO DIỆN AUTO GK ---
-GKTab:CreateToggle({
-    Name = "Bật Chế Độ Bắt Bóng Tự Động",
+MainTab:CreateToggle({
+    Name = "Vô hạn Thể lực",
     CurrentValue = false,
-    Callback = function(Value) _G.AutoGK = Value end,
+    Callback = function(Value) _G.InfStamina = Value end,
 })
 
-GKTab:CreateSlider({
-    Name = "Vùng nguy hiểm",
-    Range = {5, 50},
-    Increment = 1,
-    CurrentValue = 20,
-    Callback = function(Value) _G.GKDistance = Value end,
+--- GIAO DIỆN SỬA LỖI (FIX TAB) ---
+FixTab:CreateSection("Chỉnh độ cao nếu bị Lún/Bay")
+
+FixTab:CreateSlider({
+    Name = "Chỉnh Độ Cao (Hip Height)",
+    Range = {0, 20},
+    Increment = 0.5,
+    CurrentValue = 2, -- Giá trị chuẩn ban đầu
+    Callback = function(Value)
+        _G.CustomHipHeight = Value
+    end,
 })
 
---- GIAO DIỆN MUSIC ---
+FixTab:CreateParagraph({Title = "Hướng dẫn:", Content = "- Nếu bị lún xuống đất: KÉO TĂNG LÊN\n- Nếu bị bay trên trời: KÉO GIẢM XUỐNG\n- Mức chuẩn thường là từ 2 đến 12 tùy nhân vật."})
+
+--- GIAO DIỆN NHẠC ---
 local CurrentSound = nil
 MusicTab:CreateButton({
     Name = "🧧 Phát Nhạc Tết",
@@ -162,4 +140,3 @@ MusicTab:CreateSlider({
 })
 
 Rayfield:LoadConfiguration()
-
